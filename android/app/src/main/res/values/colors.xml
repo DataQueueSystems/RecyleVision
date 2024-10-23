@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#000</color> <!-- Replace with your desired color -->
+    <color name="primary_dark">#3d737f</color> <!-- Optional, for other color references -->
+        <color name="bootsplash_background">#FF0000</color> <!-- Replace with your desired color -->
+</resources>
