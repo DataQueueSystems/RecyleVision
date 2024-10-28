@@ -1,15 +1,29 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React, { createContext, useContext, useState } from 'react'
+import { Alert, StyleSheet, Text, View } from 'react-native'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import NetInfo, { useNetInfoInstance } from '@react-native-community/netinfo';
+import { fetch } from "@react-native-community/netinfo";
+
+import { showToast } from '../../utils/Toast';
 
 const Authcontext=createContext()
 export const AuthContextProvider=({children})=>{
   const [isLogin, setIsLogin] = useState(false);
+
+  const Checknetinfo = async () => {
+    const state = await NetInfo.fetch(); // Get the current network state
+    if (!state.isConnected) {
+      showToast('No internet connection.', 'error');
+      return false; // No internet connection
+    }
+    return true; // Internet connection is available
+  };
 
     return(
        <Authcontext.Provider
        value={{
         isLogin,
         setIsLogin,
+        Checknetinfo,
       }}>
          {children}
        </Authcontext.Provider>

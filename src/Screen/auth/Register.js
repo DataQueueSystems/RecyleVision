@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import BoldText from '../../customText/BoldText';
@@ -13,26 +14,55 @@ import {Button, useTheme} from 'react-native-paper';
 import LightText from '../../customText/LightText';
 import RegularText from '../../customText/RegularText';
 import Header from '../../Component/Header';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {useAuthContext} from '../../context/GlobaContext';
+import axios from 'axios';
 
 export default function Register() {
   let theme = useTheme();
   let GlobalStyle = globalStyles(theme);
+  const {Checknetinfo} = useAuthContext();
 
   // State for email and password inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  let navigation=useNavigation()
+  const [spinner, setSpinner] = useState(false);
+
+  let navigation = useNavigation();
   const handleLogin = () => {
-    navigation.navigate("Login")
-    
+    navigation.navigate('Login');
+  };
+
+  const handleRegister = async () => {
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return;
+    }
+    // Handle login action here
+    // Prepare for data
+    let data = {
+      email,
+      password,
+    };
+
+    try {
+      console.log('data:', data);
+      let response = await axios.post('endpoint', data);
+      console.log(response.data, 'response');
+      //    await AsyncStorage.setItem('IsLogin', 'true');
+      // setIsLogin(false);
+      // navigation.navigate('Home');
+    } catch (err) {
+      // Log and handle any error
+      console.log('Error:', err);
+    }
   };
   let screenName = 'Register';
- 
+
   return (
     <>
       <Header screenName={screenName} />
-
       <View
         style={[
           styles.mainContainer,
@@ -47,7 +77,13 @@ export default function Register() {
         {/* Inputs */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                color: theme.colors.onBackground,
+                borderColor: theme.colors.onBackground,
+              },
+            ]}
             placeholder="Email"
             placeholderTextColor="#888"
             keyboardType="email-address"
@@ -55,7 +91,13 @@ export default function Register() {
             onChangeText={setEmail}
           />
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                color: theme.colors.onBackground,
+                borderColor: theme.colors.onBackground,
+              },
+            ]}
             placeholder="Password"
             placeholderTextColor="#888"
             secureTextEntry
@@ -63,10 +105,16 @@ export default function Register() {
             onChangeText={setPassword}
           />
           <Button
-            onPress={handleLogin}
+            onPress={spinner ? () => {} : handleRegister}
             mode="contained"
             style={[styles.btn, {backgroundColor: theme.colors.onBackground}]}>
-            <BoldText style={{color: theme.colors.background}}>Login</BoldText>
+            {spinner ? (
+              <ActivityIndicator size={24} color={theme.colors.background} />
+            ) : (
+              <BoldText style={{color: theme.colors.background}}>
+                Register
+              </BoldText>
+            )}
           </Button>
         </View>
 
@@ -78,9 +126,8 @@ export default function Register() {
             alignItems: 'center',
           }}>
           <LightText>Already have an account? </LightText>
-          <TouchableOpacity
-            onPress={handleLogin}>
-            <RegularText style={{color: 'blue'}}>Login</RegularText>
+          <TouchableOpacity onPress={handleLogin}>
+            <RegularText style={{color: theme.colors.blue}}>Login</RegularText>
           </TouchableOpacity>
         </View>
       </View>
@@ -107,7 +154,6 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,

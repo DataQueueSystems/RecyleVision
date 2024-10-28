@@ -41,7 +41,7 @@ const OnboardingScreen = ({}) => {
       onDone={handleBtnPress} // Navigate after the last onboarding screen
       pages={[
         {
-          backgroundColor: '#fff',
+          backgroundColor: theme.colors.onboardingBackground1,
           image: (
             <Image
               style={{
@@ -67,7 +67,7 @@ const OnboardingScreen = ({}) => {
           },
         },
         {
-          backgroundColor: '#f7f7f7',
+          backgroundColor: theme.colors.onboardingBackground2,
           image: (
             <Image
               style={{width: windowWidth, height: windowHeight}}
@@ -89,7 +89,7 @@ const OnboardingScreen = ({}) => {
           },
         },
         {
-          backgroundColor: '#fff',
+          backgroundColor: theme.colors.onboardingBackground3,
           image: (
             <Image
               style={{width: windowWidth, height: windowHeight}}
@@ -122,8 +122,6 @@ const OnboardingScreen = ({}) => {
                   Get started
                 </BoldText>
               </Button>
-
-             
             </View>
           ),
           titleStyles: {

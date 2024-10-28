@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import BoldText from '../../customText/BoldText';
@@ -16,30 +17,56 @@ import {useNavigation} from '@react-navigation/native';
 import Header from '../../Component/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
+import axios from 'axios';
 
 export default function Login() {
   let theme = useTheme();
-  const {setIsLogin} = useAuthContext();
+  const {setIsLogin,Checknetinfo} = useAuthContext();
   let GlobalStyle = globalStyles(theme);
   let navigation = useNavigation();
 
   // State for email and password inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [spinner, setSpinner] = useState(false);
+
 
   const handleLogin = async () => {
+
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return;
+    }
     // Handle login action here
-    console.log('Email:', email);
-    console.log('Password:', password);
+    // Prepare for data
     await AsyncStorage.setItem('IsLogin', 'true');
-    setIsLogin(false);
-    navigation.navigate('Home');
+      setIsLogin(false);
+      navigation.navigate('Home');
+    // let data = {
+    //   email,
+    //   password,
+    // };
+    // try {
+    //   console.log('data:', data);
+    //   let response = await axios.post('endpoint', data);
+    //   console.log(response.data, 'response');
+    //      await AsyncStorage.setItem('IsLogin', 'true');
+    //   setIsLogin(false);
+    //   navigation.navigate('Home');
+    // } catch (err) {
+    //   // Log and handle any error
+    //   console.log('Error:', err);
+    //   // navigation.navigate('Home');
+
+    // }
   };
+  
   const handleRegister = () => {
     navigation.navigate('Register');
   };
-  let screenName = 'Login';
 
+  let screenName = 'Login';
   return (
     <>
       <Header screenName={screenName} />
@@ -60,7 +87,7 @@ export default function Login() {
         {/* Inputs */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, {color: theme.colors.onBackground,borderColor:theme.colors.onBackground}]}
             placeholder="Email"
             placeholderTextColor="#888"
             keyboardType="email-address"
@@ -68,7 +95,7 @@ export default function Login() {
             onChangeText={setEmail}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, {color: theme.colors.onBackground,borderColor:theme.colors.onBackground}]}
             placeholder="Password"
             placeholderTextColor="#888"
             secureTextEntry
@@ -76,10 +103,14 @@ export default function Login() {
             onChangeText={setPassword}
           />
           <Button
-            onPress={handleLogin}
+            onPress={spinner ? () => {} : handleLogin}
             mode="contained"
             style={[styles.btn, {backgroundColor: theme.colors.onBackground}]}>
-            <BoldText style={{color: theme.colors.background}}>Login</BoldText>
+              {spinner?(
+            <ActivityIndicator size={24} color={theme.colors.background} />
+              ):(
+                <BoldText style={{color: theme.colors.background}}>Login</BoldText>
+              )}
           </Button>
         </View>
 
@@ -92,7 +123,7 @@ export default function Login() {
           }}>
           <LightText>Don't have an account? </LightText>
           <TouchableOpacity onPress={handleRegister}>
-            <RegularText style={{color: 'blue'}}>Register</RegularText>
+            <RegularText style={{color: theme.colors.blue}}>Register</RegularText>
           </TouchableOpacity>
         </View>
       </View>
@@ -118,7 +149,6 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
