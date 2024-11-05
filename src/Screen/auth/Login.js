@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useState} from 'react';
 import BoldText from '../../customText/BoldText';
@@ -18,10 +19,15 @@ import Header from '../../Component/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
+import { useNetInfoInstance } from '@react-native-community/netinfo';
+import { showToast } from '../../../utils/Toast';
 
 export default function Login() {
   let theme = useTheme();
   const {setIsLogin,Checknetinfo} = useAuthContext();
+  const { netInfo: { type, isConnected, details } } = useNetInfoInstance();
+  console.log(details?.ipAddress,'details');
+
   let GlobalStyle = globalStyles(theme);
   let navigation = useNavigation();
 
@@ -30,36 +36,46 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [spinner, setSpinner] = useState(false);
 
-
   const handleLogin = async () => {
 
     const isConnected = await Checknetinfo();
     if (!isConnected) {
       setSpinner(false);
       return;
-    }
+    };
+
     // Handle login action here
     // Prepare for data
-    await AsyncStorage.setItem('IsLogin', 'true');
-      setIsLogin(false);
-      navigation.navigate('Home');
-    // let data = {
-    //   email,
-    //   password,
-    // };
-    // try {
-    //   console.log('data:', data);
-    //   let response = await axios.post('endpoint', data);
-    //   console.log(response.data, 'response');
-    //      await AsyncStorage.setItem('IsLogin', 'true');
+
+    // await AsyncStorage.setItem('IsLogin', 'true');
     //   setIsLogin(false);
     //   navigation.navigate('Home');
-    // } catch (err) {
-    //   // Log and handle any error
-    //   console.log('Error:', err);
-    //   // navigation.navigate('Home');
 
-    // }
+    let data = {
+      email,
+      password,
+    };
+    
+    try {
+      let response = await axios.post(`http://${details?.ipAddress}:5000/login`,data);
+      // let response = await axios.post(`http://10.0.2.2:5000/login`,data); for emulator
+      if (response.status === 200) {
+        let message=response.data.message;
+        showToast(`${message}`);
+        await AsyncStorage.setItem('IsLogin', 'true');
+     setIsLogin(false);
+     navigation.navigate('Home');
+      }else{
+        showToast("Something went wrong");
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Check if the error has a response (like status 400 errors)
+        if (error.response) {
+          showToast(`${error.response.data.error}`)
+        };
+      }
+    }
   };
   
   const handleRegister = () => {

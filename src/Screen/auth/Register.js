@@ -17,13 +17,20 @@ import Header from '../../Component/Header';
 import {useNavigation} from '@react-navigation/native';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
+import {useNetInfoInstance} from '@react-native-community/netinfo';
+import {showToast} from '../../../utils/Toast';
 
 export default function Register() {
   let theme = useTheme();
   let GlobalStyle = globalStyles(theme);
   const {Checknetinfo} = useAuthContext();
+  const {
+    netInfo: {type, isConnected, details},
+  } = useNetInfoInstance();
+  console.log(details?.ipAddress, 'details');
 
   // State for email and password inputs
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [spinner, setSpinner] = useState(false);
@@ -42,20 +49,33 @@ export default function Register() {
     // Handle login action here
     // Prepare for data
     let data = {
+      name,
       email,
       password,
     };
+    if (name == '' || email == '' || password == '') {
+      showToast('Please fill out all fields');
+      return;
+    }
 
     try {
-      console.log('data:', data);
-      let response = await axios.post('endpoint', data);
-      console.log(response.data, 'response');
-      //    await AsyncStorage.setItem('IsLogin', 'true');
-      // setIsLogin(false);
-      // navigation.navigate('Home');
-    } catch (err) {
-      // Log and handle any error
-      console.log('Error:', err);
+      let response = await axios.post(`http://${details?.ipAddress}:5000/register`,data);
+      // let response = await axios.post(`http://10.0.2.2:5000/register`,data); for emulator
+
+      if (response.status === 200) {
+        let message = response.data.message;
+        showToast(`${message}`);
+        navigation.navigate('Login');
+      } else {
+        showToast('Something went wrong');
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Check if the error has a response (like status 400 errors)
+        if (error.response) {
+          showToast(`${error.response.data.error}`);
+        }
+      }
     }
   };
   let screenName = 'Register';
@@ -76,6 +96,20 @@ export default function Register() {
 
         {/* Inputs */}
         <View style={styles.inputContainer}>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                color: theme.colors.onBackground,
+                borderColor: theme.colors.onBackground,
+              },
+            ]}
+            placeholder="Name"
+            placeholderTextColor="#888"
+            value={name}
+            onChangeText={setName}
+          />
+
           <TextInput
             style={[
               styles.input,
