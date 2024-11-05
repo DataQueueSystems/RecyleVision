@@ -28,6 +28,7 @@ export default function Home() {
    // Create an isolated instance of NetInfo
  const { netInfo: { type, isConnected, details } } = useNetInfoInstance();
  console.log(details?.ipAddress,'details');
+ 
   const {Checknetinfo,} = useAuthContext();
   const [selectedImage, setSelectedImage] = useState(null);
   const [spinner, setSpinner] = useState(false);
@@ -42,7 +43,6 @@ export default function Home() {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
-        console.log('Image picker error:', response.errorMessage);
       } else {
         const uri = response.assets[0]?.uri;
         setSelectedImage(uri);
@@ -96,29 +96,26 @@ export default function Home() {
         name: selectedImage.fileName || 'image.jpg', // Use file name if available
       });
 
-      // Make the prediction request
-      const response = await axios.post(
-        `http://${details?.ipAddress}/predict`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+      // let response = await axios.post(`http://10.0.2.2:5000/predict`,formData,{
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // },);
+
+      let response = await axios.post(`http://${details?.ipAddress}:5000/predict`,formData,{
+        headers: {
+          'Content-Type': 'multipart/form-data',
         },
-      );
+      },);
 
       // Log the response and handle the prediction result
       if (response.data && response.data.prediction) {
-        console.log('Prediction:', response.data.prediction);
         setPrediction(response.data.prediction);
         // Update the UI with the prediction result
         // Example: setPrediction(response.data.prediction);
       } else {
-        console.error('Prediction failed:', response.data.message);
       }
     } catch (err) {
-      // Log and handle any error
-      console.error('Error during image upload or prediction:', err);
     } finally {
       setSpinner(false); // Hide the spinner at the end
     }
