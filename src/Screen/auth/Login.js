@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import BoldText from '../../customText/BoldText';
-import globalStyles from '../../Styles/Globalstyle';
 import {Button, useTheme} from 'react-native-paper';
 import LightText from '../../customText/LightText';
 import RegularText from '../../customText/RegularText';
@@ -19,65 +18,49 @@ import Header from '../../Component/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
-import { useNetInfoInstance } from '@react-native-community/netinfo';
-import { showToast } from '../../../utils/Toast';
+import {showToast} from '../../../utils/Toast';
 
 export default function Login() {
   let theme = useTheme();
-  const {setIsLogin,Checknetinfo} = useAuthContext();
-  const { netInfo: { type, isConnected, details } } = useNetInfoInstance();
-  console.log(details?.ipAddress,'details');
-
-  let GlobalStyle = globalStyles(theme);
+  const {setIsLogin, Checknetinfo, ipAddress} = useAuthContext();
   let navigation = useNavigation();
-
   // State for email and password inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [spinner, setSpinner] = useState(false);
 
   const handleLogin = async () => {
-
     const isConnected = await Checknetinfo();
     if (!isConnected) {
       setSpinner(false);
       return;
     };
-
-    // Handle login action here
-    // Prepare for data
-
-    // await AsyncStorage.setItem('IsLogin', 'true');
-    //   setIsLogin(false);
-    //   navigation.navigate('Home');
-
     let data = {
       email,
       password,
     };
-    
     try {
-      let response = await axios.post(`http://${details?.ipAddress}:5000/login`,data);
-      // let response = await axios.post(`http://10.0.2.2:5000/login`,data); for emulator
+      let response = await axios.post(`${ipAddress}/login`, data); //Live
+      // let response = await axios.post(`http://10.0.2.2:5000/login`,data); //for emulator
       if (response.status === 200) {
-        let message=response.data.message;
+        let message = response.data.message;
         showToast(`${message}`);
         await AsyncStorage.setItem('IsLogin', 'true');
-     setIsLogin(false);
-     navigation.navigate('Home');
-      }else{
-        showToast("Something went wrong");
-      };
+        setIsLogin(false);
+        navigation.navigate('Home');
+      } else {
+        showToast('Something went wrong');
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // Check if the error has a response (like status 400 errors)
         if (error.response) {
-          showToast(`${error.response.data.error}`)
-        };
+          showToast(`${error.response.data.error}`);
+        }
       }
     }
   };
-  
+
   const handleRegister = () => {
     navigation.navigate('Register');
   };
@@ -98,12 +81,20 @@ export default function Login() {
           <LightText style={{marginTop: 10}}>
             Please sign in to continue or create a new account.
           </LightText>
+          <LightText style={{marginTop: 10}}>Connecting on {ipAddress}</LightText>
+
         </View>
 
         {/* Inputs */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={[styles.input, {color: theme.colors.onBackground,borderColor:theme.colors.onBackground}]}
+            style={[
+              styles.input,
+              {
+                color: theme.colors.onBackground,
+                borderColor: theme.colors.onBackground,
+              },
+            ]}
             placeholder="Email"
             placeholderTextColor="#888"
             keyboardType="email-address"
@@ -111,7 +102,13 @@ export default function Login() {
             onChangeText={setEmail}
           />
           <TextInput
-            style={[styles.input, {color: theme.colors.onBackground,borderColor:theme.colors.onBackground}]}
+            style={[
+              styles.input,
+              {
+                color: theme.colors.onBackground,
+                borderColor: theme.colors.onBackground,
+              },
+            ]}
             placeholder="Password"
             placeholderTextColor="#888"
             secureTextEntry
@@ -122,11 +119,13 @@ export default function Login() {
             onPress={spinner ? () => {} : handleLogin}
             mode="contained"
             style={[styles.btn, {backgroundColor: theme.colors.onBackground}]}>
-              {spinner?(
-            <ActivityIndicator size={24} color={theme.colors.background} />
-              ):(
-                <BoldText style={{color: theme.colors.background}}>Login</BoldText>
-              )}
+            {spinner ? (
+              <ActivityIndicator size={24} color={theme.colors.background} />
+            ) : (
+              <BoldText style={{color: theme.colors.background}}>
+                Login
+              </BoldText>
+            )}
           </Button>
         </View>
 
@@ -139,7 +138,9 @@ export default function Login() {
           }}>
           <LightText>Don't have an account? </LightText>
           <TouchableOpacity onPress={handleRegister}>
-            <RegularText style={{color: theme.colors.blue}}>Register</RegularText>
+            <RegularText style={{color: theme.colors.blue}}>
+              Register
+            </RegularText>
           </TouchableOpacity>
         </View>
       </View>

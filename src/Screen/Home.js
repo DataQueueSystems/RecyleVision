@@ -21,15 +21,11 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../utils/Toast';
 import {useAuthContext} from '../context/GlobaContext';
 import axios from 'axios';
-import {uploadImageToCloudinary} from '../../utils/cloudinary';
-import { useNetInfoInstance } from '@react-native-community/netinfo';
+import { uploadImageToCloudinary } from '../../utils/cloudinary';
+
 export default function Home() {
   let theme = useTheme();
-   // Create an isolated instance of NetInfo
- const { netInfo: { type, isConnected, details } } = useNetInfoInstance();
- console.log(details?.ipAddress,'details');
- 
-  const {Checknetinfo,} = useAuthContext();
+  const {Checknetinfo, ipAddress} = useAuthContext();
   const [selectedImage, setSelectedImage] = useState(null);
   const [spinner, setSpinner] = useState(false);
   const [prediction, setPrediction] = useState(null);
@@ -69,6 +65,7 @@ export default function Home() {
   };
 
   const handleSubmit = async () => {
+    setPrediction(null);
     setSpinner(true); // Show the spinner
     const isConnected = await Checknetinfo(); // Check network connection
     if (!isConnected) {
@@ -82,31 +79,29 @@ export default function Home() {
         console.error('No image selected');
         setSpinner(false);
         return;
-      }
+      };
 
       // // Upload the selected image to Cloudinary
-      // const uploadedImageUrl = await uploadImageToCloudinary(selectedImage);
-      // console.log('Uploaded Image URL:', uploadedImageUrl);
-
+      const uploadedImageUrl = await uploadImageToCloudinary(selectedImage);
+      console.log('Uploaded Image URL:', uploadedImageUrl);
       // Prepare the form data for prediction
       const formData = new FormData();
       formData.append('file', {
-        uri: selectedImage,
+        uri: uploadedImageUrl||selectedImage,
         type: 'image/jpeg', // Use the correct MIME type based on your image
         name: selectedImage.fileName || 'image.jpg', // Use file name if available
       });
-
-      // let response = await axios.post(`http://10.0.2.2:5000/predict`,formData,{
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // },);
-
-      let response = await axios.post(`http://${details?.ipAddress}:5000/predict`,formData,{
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      
+      let response = await axios.post(
+        // `http://10.0.2.2:5000/predict`,  //for Android
+        `${ipAddress}/predict`, //Live
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      },);
+      );
 
       // Log the response and handle the prediction result
       if (response.data && response.data.prediction) {
@@ -151,8 +146,7 @@ export default function Home() {
     return () => backHandler.remove();
   }, [isFocused]);
 
-
-  let navigation=useNavigation()
+  let navigation = useNavigation();
   return (
     <View
       style={[
@@ -177,13 +171,6 @@ export default function Home() {
           suggestions on how to properly recycle it.
         </LightText>
       </View>
-
-{/* NetworkInfo */}
-<Button onPress={()=>navigation.navigate("NetworkInfo")}>
-NetworkInfo
-</Button>
-
-      
       {selectedImage && (
         <RegularText style={{textAlign: 'center', fontSize: 14}}>
           Image Preview
