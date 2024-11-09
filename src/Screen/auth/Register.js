@@ -6,10 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useState} from 'react';
 import BoldText from '../../customText/BoldText';
-import globalStyles from '../../Styles/Globalstyle';
 import {Button, useTheme} from 'react-native-paper';
 import LightText from '../../customText/LightText';
 import RegularText from '../../customText/RegularText';
@@ -17,18 +17,11 @@ import Header from '../../Component/Header';
 import {useNavigation} from '@react-navigation/native';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
-import {useNetInfoInstance} from '@react-native-community/netinfo';
 import {showToast} from '../../../utils/Toast';
 
 export default function Register() {
   let theme = useTheme();
-  let GlobalStyle = globalStyles(theme);
-  const {Checknetinfo} = useAuthContext();
-  const {
-    netInfo: {type, isConnected, details},
-  } = useNetInfoInstance();
-  console.log(details?.ipAddress, 'details');
-
+  const {Checknetinfo, ipAddress} = useAuthContext();
   // State for email and password inputs
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -53,23 +46,15 @@ export default function Register() {
       email,
       password,
     };
-    if (name == '' || email == '' || password == '') {
-      showToast('Please fill out all fields');
-      return;
-    }
 
     try {
-      let response = await axios.post(`http://${details?.ipAddress}:5000/register`,data);
-      // let response = await axios.post(`http://10.0.2.2:5000/register`,data); for emulator
-
-      if (response.status === 200) {
+      let response = await  axios.post(`${ipAddress}/register`, data); //Live
+      // let response = await axios.post(`http://10.0.2.2:5000/register`,data); //for emulator
         let message = response.data.message;
         showToast(`${message}`);
         navigation.navigate('Login');
-      } else {
-        showToast('Something went wrong');
-      };
     } catch (error) {
+      Alert.alert("fdsfd")
       if (axios.isAxiosError(error)) {
         // Check if the error has a response (like status 400 errors)
         if (error.response) {
@@ -92,8 +77,8 @@ export default function Register() {
         <View style={styles.headingContainer}>
           <BoldText style={styles.authHead}>Register</BoldText>
           <LightText style={{marginTop: 10}}>create your account</LightText>
+          <LightText style={{marginTop: 10}}>Connecting on {ipAddress}</LightText>
         </View>
-
         {/* Inputs */}
         <View style={styles.inputContainer}>
           <TextInput

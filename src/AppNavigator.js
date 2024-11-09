@@ -10,8 +10,6 @@ import {useAuthContext} from './context/GlobaContext';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {ActivityIndicator, useTheme} from 'react-native-paper';
 import Register from './Screen/auth/Register';
-import NetworkInfo from './Screen/NetworkInfo';
-
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -80,11 +78,7 @@ export default function AppNavigator() {
               component={Home}
               options={{headerShown: false}}
             />
-            <Stack.Screen
-              name="NetworkInfo"
-              component={NetworkInfo}
-              options={{headerShown: false}}
-            />
+          
           </>
         )}
       </Stack.Navigator>
