@@ -48,13 +48,12 @@ export default function Register() {
     };
 
     try {
-      let response = await  axios.post(`${ipAddress}/register`, data); //Live
+      let response = await axios.post(`${ipAddress}/register`, data); //Live
       // let response = await axios.post(`http://10.0.2.2:5000/register`,data); //for emulator
-        let message = response.data.message;
-        showToast(`${message}`);
-        navigation.navigate('Login');
+      let message = response.data.message;
+      showToast(`${message}`);
+      navigation.navigate('Login');
     } catch (error) {
-      Alert.alert("fdsfd")
       if (axios.isAxiosError(error)) {
         // Check if the error has a response (like status 400 errors)
         if (error.response) {
@@ -77,7 +76,9 @@ export default function Register() {
         <View style={styles.headingContainer}>
           <BoldText style={styles.authHead}>Register</BoldText>
           <LightText style={{marginTop: 10}}>create your account</LightText>
-          <LightText style={{marginTop: 10}}>Connecting on {ipAddress}</LightText>
+          <LightText style={{marginTop: 10}}>
+            Connecting on {ipAddress}
+          </LightText>
         </View>
         {/* Inputs */}
         <View style={styles.inputContainer}>

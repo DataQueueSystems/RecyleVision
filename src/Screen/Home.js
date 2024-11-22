@@ -8,6 +8,8 @@ import {
   BackHandler,
   Dimensions,
   ActivityIndicator,
+  Alert,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import BoldText from '../customText/BoldText';
@@ -21,11 +23,14 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../utils/Toast';
 import {useAuthContext} from '../context/GlobaContext';
 import axios from 'axios';
-import { uploadImageToCloudinary } from '../../utils/cloudinary';
+import {uploadImageToCloudinary} from '../../utils/cloudinary';
+import {Iconify} from 'react-native-iconify';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SvgComponent from '../Component/SVGComponent';
 
 export default function Home() {
   let theme = useTheme();
-  const {Checknetinfo, ipAddress} = useAuthContext();
+  const {Checknetinfo, ipAddress, setIsLogin} = useAuthContext();
   const [selectedImage, setSelectedImage] = useState(null);
   const [spinner, setSpinner] = useState(false);
   const [prediction, setPrediction] = useState(null);
@@ -46,6 +51,7 @@ export default function Home() {
       }
     });
   };
+
   const handleCameraLaunch = () => {
     const options = {
       mediaType: 'photo',
@@ -79,7 +85,7 @@ export default function Home() {
         console.error('No image selected');
         setSpinner(false);
         return;
-      };
+      }
 
       // // Upload the selected image to Cloudinary
       const uploadedImageUrl = await uploadImageToCloudinary(selectedImage);
@@ -87,11 +93,11 @@ export default function Home() {
       // Prepare the form data for prediction
       const formData = new FormData();
       formData.append('file', {
-        uri: uploadedImageUrl||selectedImage,
+        uri: uploadedImageUrl || selectedImage,
         type: 'image/jpeg', // Use the correct MIME type based on your image
         name: selectedImage.fileName || 'image.jpg', // Use file name if available
       });
-      
+
       let response = await axios.post(
         // `http://10.0.2.2:5000/predict`,  //for Android
         `${ipAddress}/predict`, //Live
@@ -147,106 +153,149 @@ export default function Home() {
   }, [isFocused]);
 
   let navigation = useNavigation();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout', //title
+      'Are you sure ,you want to logout ?', //message
+      [
+        {
+          text: 'Cancel', // Cancel button
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK', // OK button
+          onPress: () => {
+            setIsLogin(true);
+            AsyncStorage.setItem('IsLogin', 'false');
+            AsyncStorage.clear();
+            showToast('Logout successfully!');
+            // some logic
+          },
+        },
+      ],
+      {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
+    );
+  };
+
   return (
     <View
       style={[
         styles.mainContainer,
         {backgroundColor: theme.colors.background},
       ]}>
-      {/* Heading */}
-      <View style={styles.headingContainer}>
-        <Animated.Text
-          style={[styles.appName, {color: theme.colors.onBackground}]}>
-          Recycle Vision
-        </Animated.Text>
-      </View>
-
-      {/* How it works */}
-      <View style={styles.howItWorksContainer}>
-        <BoldText style={styles.sectionTitle}>How it works</BoldText>
-        <LightText style={styles.description}>
-          Recycle Vision helps you determine if the items in your waste are
-          recyclable. Simply upload a picture of the item, and the app will
-          analyze it to let you know whether it is recyclable or not, along with
-          suggestions on how to properly recycle it.
-        </LightText>
-      </View>
-      {selectedImage && (
-        <RegularText style={{textAlign: 'center', fontSize: 14}}>
-          Image Preview
-        </RegularText>
-      )}
-
-      {/* Display the selected image */}
-      {selectedImage && (
-        <>
-          <View style={styles.imageContainer}>
-            <Image source={{uri: selectedImage}} style={styles.imageStyle} />
+      <ScrollView
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
+      >
+        {/* Heading */}
+        <View style={styles.headingContainer}>
+          <View>
+            <BoldText style={{fontSize: 24}}>Welcome to,</BoldText>
+            <BoldText style={{fontSize: 24, top: -2}}>Recycle Vision</BoldText>
           </View>
 
-          {/* Show the Spinner */}
-          {spinner ? (
-            <View
-              style={{
-                marginTop: 20,
-                flexDirection: 'row',
-                alignSelf: 'center',
-                gap: 10,
-                alignItems: 'center',
-              }}>
-              <ActivityIndicator size={40} color={theme.colors.onBackground} />
-              <TouchableOpacity onPress={handleCancel}>
-                <SemiBoldText>Cancel</SemiBoldText>
+          <Iconify
+            icon="heroicons-outline:logout"
+            size={38}
+            color={theme.colors.onBackground}
+            onPress={handleLogout}
+          />
+        </View>
+
+        <SvgComponent />
+
+        {/* How it works */}
+        <View style={styles.howItWorksContainer}>
+          <BoldText style={styles.sectionTitle}>How it works</BoldText>
+          <LightText style={styles.description}>
+            Recycle Vision helps you determine if the items in your waste are
+            recyclable. Simply upload a picture of the item, and the app will
+            analyze it to let you know whether it is recyclable or not, along
+            with suggestions on how to properly recycle it.
+          </LightText>
+        </View>
+        {selectedImage && (
+          <RegularText style={{textAlign: 'center', fontSize: 14}}>
+            Image Preview
+          </RegularText>
+        )}
+
+        {/* Display the selected image */}
+        {selectedImage && (
+          <>
+            <View style={styles.imageContainer}>
+              <Image source={{uri: selectedImage}} style={styles.imageStyle} />
+            </View>
+
+            {/* Show the Spinner */}
+            {spinner ? (
+              <View
+                style={{
+                  marginTop: 20,
+                  flexDirection: 'row',
+                  alignSelf: 'center',
+                  gap: 10,
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator
+                  size={40}
+                  color={theme.colors.onBackground}
+                />
+                <TouchableOpacity onPress={handleCancel}>
+                  <SemiBoldText>Cancel</SemiBoldText>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* Show the submit Btn if image is there */}
+                <Button
+                  mode="elevated"
+                  disabled={spinner ? true : false}
+                  style={{
+                    width: Dimensions.get('window').width / 2,
+                    alignSelf: 'center',
+                  }}
+                  onPress={spinner ? () => {} : handleSubmit}>
+                  <SemiBoldText>Submit</SemiBoldText>
+                </Button>
+              </>
+            )}
+
+            {prediction && (
+              <View style={{alignItems: 'center', marginTop: 10}}>
+                <SemiBoldText style={styles.responsehead}>
+                  Prediction:
+                </SemiBoldText>
+                <SemiBoldText style={styles.responseText}>
+                  {prediction}
+                </SemiBoldText>
+              </View>
+            )}
+          </>
+        )}
+
+        {!spinner && (
+          <>
+            {/* Upload and Camera buttons */}
+            <View style={styles.uploadcontainer}>
+              <TouchableOpacity
+                disabled={spinner ? true : false}
+                style={styles.uploadView}
+                onPress={handleImagePicker}>
+                <Ionicon size={48} name="cloud-upload-outline" color={'grey'} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={spinner ? true : false}
+                style={styles.uploadView}
+                onPress={handleCameraLaunch}>
+                <Ionicon size={48} name="camera-outline" color={'grey'} />
               </TouchableOpacity>
             </View>
-          ) : (
-            <>
-              {/* Show the submit Btn if image is there */}
-              <Button
-                mode="elevated"
-                disabled={spinner ? true : false}
-                style={{
-                  width: Dimensions.get('window').width / 2,
-                  alignSelf: 'center',
-                }}
-                onPress={spinner ? () => {} : handleSubmit}>
-                <SemiBoldText>Submit</SemiBoldText>
-              </Button>
-            </>
-          )}
-
-          {prediction && (
-            <View style={{alignItems: 'center', marginTop: 10}}>
-              <SemiBoldText style={styles.responsehead}>
-                Prediction:
-              </SemiBoldText>
-              <SemiBoldText style={styles.responseText}>
-                {prediction}
-              </SemiBoldText>
-            </View>
-          )}
-        </>
-      )}
-
-      {!spinner && (
-        <>
-          {/* Upload and Camera buttons */}
-          <View style={styles.uploadcontainer}>
-            <TouchableOpacity
-              disabled={spinner ? true : false}
-              style={styles.uploadView}
-              onPress={handleImagePicker}>
-              <Ionicon size={50} name="cloud-upload-outline" color={'grey'} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={spinner ? true : false}
-              style={styles.uploadView}
-              onPress={handleCameraLaunch}>
-              <Ionicon size={50} name="camera-outline" color={'grey'} />
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -257,41 +306,38 @@ const styles = StyleSheet.create({
   },
   headingContainer: {
     paddingVertical: 10,
-    paddingHorizontal: 16,
-  },
-  appName: {
-    fontSize: 22,
-    textAlign: 'center',
-    fontFamily: 'Sora-Bold',
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   howItWorksContainer: {
     paddingVertical: 20,
     paddingHorizontal: 16,
+    marginTop: 70,
   },
   sectionTitle: {
     fontSize: 18,
     marginBottom: 10,
-    textAlign: 'center',
   },
   description: {
     fontSize: 16,
     lineHeight: 22,
-    textAlign: 'center',
   },
   uploadcontainer: {
     padding: 5,
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 20,
+    // position: 'absolute',
+    // left: 0,
+    // right: 0,
+    // bottom: 20,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
+    marginVertical: 30,
   },
   uploadView: {
     backgroundColor: 'rgba(231, 227, 227, 0.237)',
-    padding: 20,
+    padding: 12,
     borderRadius: 100,
   },
   imageContainer: {
