@@ -16,6 +16,8 @@ import {useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import BoldText from '../../customText/BoldText';
 import LightText from '../../customText/LightText';
+import {Iconify} from 'react-native-iconify';
+import RegularText from '../../customText/RegularText';
 
 const OnboardingScreen = ({}) => {
   let navigation = useNavigation();
@@ -35,100 +37,113 @@ const OnboardingScreen = ({}) => {
     }
   };
 
+  let iconSize = 180;
+
   return (
     <Onboarding
+      skipLabel={
+        <RegularText
+          style={{
+            fontSize: 16,
+            color: theme.colors.appColor,
+            fontFamily: 'Sora-Regular',
+          }}>
+          Skip
+        </RegularText>
+      }
+      nextLabel={
+        <RegularText
+          style={{
+            fontSize: 16,
+            color: theme.colors.appColor,
+            fontFamily: 'Sora-Regular',
+          }}>
+          Next
+        </RegularText>
+      }
       onSkip={handleBtnPress} // Replace 'HomeScreen' with your desired navigation target
       onDone={handleBtnPress} // Navigate after the last onboarding screen
       pages={[
         {
-          backgroundColor: theme.colors.onboardingBackground1,
-          image: (
-            <Image
-              style={{
-                width: windowWidth,
-                height: windowHeight,
-                borderRadius: 200,
-              }}
-              source={require('../../../assets/images/onboarding/first.png')}
-            />
-          ), // Replace with your image
-          title: 'Welcome to RecycleVision',
-          subtitle:
-            "Identify what's recyclable with just a snap. Together, we can reduce waste and build a cleaner future.",
-          titleStyles: {
-            fontFamily: 'Sora-Bold', // Replace with your desired font family for the title
-            fontSize: 24, // Customize font size if needed
-            color: '#000', // Customize text color if needed
-          },
-          subTitleStyles: {
-            fontFamily: 'Sora-Regular', // Replace with your desired font family for the subtitle
-            fontSize: 16, // Customize font size if needed
-            color: '#666', // Customize text color if needed
-          },
-        },
-        {
-          backgroundColor: theme.colors.onboardingBackground2,
-          image: (
-            <Image
-              style={{width: windowWidth, height: windowHeight}}
-              source={require('../../../assets/images/onboarding/second.png')}
-            />
-          ), // Replace with your image
-          title: 'Capture Any Object',
-          subtitle:
-            "Snap a photo of any item, and we'll let you know if it can be recycled or not.",
-          titleStyles: {
-            fontFamily: 'Sora-Bold',
-            fontSize: 24,
-            color: '#000',
-          },
-          subTitleStyles: {
-            fontFamily: 'Sora-Regular',
-            fontSize: 16,
-            color: '#666',
-          },
-        },
-        {
-          backgroundColor: theme.colors.onboardingBackground3,
-          image: (
-            <Image
-              style={{width: windowWidth, height: windowHeight}}
-              source={require('../../../assets/images/onboarding/third.png')}
-            />
-          ), // Replace with your image
-          title: 'Start Recycling Smarter',
-          subtitle: (
-            <View>
-              <Text
-                style={{
-                  marginBottom: 10,
-                  marginHorizontal: 5,
-                  fontFamily: 'Sora-Regular',
-                  fontSize: 16,
-                  color: '#666',
-                  textAlign: 'center',
-                }}>
-                Tap below to start identifying recyclable items. It’s quick and
-                easy!
-              </Text>
-              <Button
-                onPress={handleBtnPress}
-                mode="contained"
-                style={[
-                  styles.btn,
-                  {backgroundColor: theme.colors.onBackground},
-                ]}>
-                <BoldText style={{color: theme.colors.background}}>
-                  Get started
-                </BoldText>
-              </Button>
+          backgroundColor: theme.colors.background,
+          title: (
+            <View style={styles.contentIcons}>
+              <Iconify
+                icon="ri:recycle-line"
+                size={iconSize}
+                color={theme.colors.onBackground}
+              />
             </View>
           ),
-          titleStyles: {
-            fontFamily: 'Sora-Bold',
-            fontSize: 24,
-            color: '#000',
-          },
+
+          subtitle: (
+            <View>
+              <RegularText
+                style={{
+                  marginBottom: 10,
+                  marginHorizontal: 15,
+                  fontFamily: 'Sora-Regular',
+                  fontSize: 17, // Customize font size if needed
+                  textAlign: 'center',
+                }}>
+                {` Welcome to RecycleVision \n Identify what's recyclable with just a
+                snap. Together, we can reduce waste and build a cleaner future.`}
+              </RegularText>
+            </View>
+          ),
+        },
+        {
+          backgroundColor: theme.colors.background,
+          title: (
+            <View style={styles.contentIcons}>
+              <Iconify
+                icon="tabler:capture-filled"
+                size={iconSize}
+                color={theme.colors.onBackground}
+              />
+            </View>
+          ),
+
+          subtitle: (
+            <View>
+              <RegularText
+                style={{
+                  marginBottom: 10,
+                  marginHorizontal: 15,
+                  fontSize: 17, // Customize font size if needed
+                  textAlign: 'center',
+                }}>
+                Capture Any Object Snap a photo of any item, and we'll let you
+                know if it can be recycled or not.
+              </RegularText>
+            </View>
+          ),
+        },
+        {
+          backgroundColor: theme.colors.background,
+          title: (
+            <View style={styles.contentIcons}>
+              <Iconify
+                icon="lucide:list-restart"
+                size={iconSize}
+                color={theme.colors.onBackground}
+              />
+            </View>
+          ),
+          subtitle: (
+            <View>
+              <RegularText
+                style={{
+                  marginBottom: 10,
+                  marginHorizontal: 15,
+                  fontSize: 17, // Customize font size if needed
+                  textAlign: 'center',
+                }}>
+                Start Recycling Smarter Tap below to start identifying
+                recyclable items. It’s quick and easy!
+              </RegularText>
+            </View>
+          ),
         },
       ]}
     />
@@ -137,6 +152,13 @@ const OnboardingScreen = ({}) => {
 const styles = StyleSheet.create({
   btn: {
     padding: 4,
+  },
+  contentIcons: {
+    // position: 'absolute',
+    bottom: '10%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
 });
 
