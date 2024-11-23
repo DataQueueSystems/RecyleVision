@@ -12,9 +12,8 @@ const lightTheme = {
     ...DefaultTheme.colors,
     background: '#f2f2f2',
     error: '#d9534f',
-    onboardingBackground1: '#E8F5E9', // Mint Green
-    onboardingBackground2: '#d1eed4', // Mint Green
-    onboardingBackground3: '#9fbba2', // Mint Green
+    green: '#388E3C',
+   
     blue: '#4a51a3', // Deep Blue
   },
   roundness: 9,
@@ -26,9 +25,8 @@ const darkTheme = {
     ...DarkTheme.colors,
     background: '#1a1c1e',
     error: '#d9534f',
-    onboardingBackground1: '#E8F5E9', // Mint Green
-    onboardingBackground2: '#d1eed4', // Mint Green
-    onboardingBackground3: '#9fbba2', // Mint Green
+    green: '#388E3C',
+  
     blue: '#4a51a3', // Deep Blue
   },
   roundness: 9,

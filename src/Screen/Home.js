@@ -108,10 +108,9 @@ export default function Home() {
           },
         },
       );
-
       // Log the response and handle the prediction result
-      if (response.data && response.data.prediction) {
-        setPrediction(response.data.prediction);
+      if (response.data && response.data) {
+        setPrediction(response.data);
         // Update the UI with the prediction result
         // Example: setPrediction(response.data.prediction);
       } else {
@@ -186,9 +185,8 @@ export default function Home() {
         {backgroundColor: theme.colors.background},
       ]}>
       <ScrollView
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}
-      >
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}>
         {/* Heading */}
         <View style={styles.headingContainer}>
           <View>
@@ -216,65 +214,6 @@ export default function Home() {
             with suggestions on how to properly recycle it.
           </LightText>
         </View>
-        {selectedImage && (
-          <RegularText style={{textAlign: 'center', fontSize: 14}}>
-            Image Preview
-          </RegularText>
-        )}
-
-        {/* Display the selected image */}
-        {selectedImage && (
-          <>
-            <View style={styles.imageContainer}>
-              <Image source={{uri: selectedImage}} style={styles.imageStyle} />
-            </View>
-
-            {/* Show the Spinner */}
-            {spinner ? (
-              <View
-                style={{
-                  marginTop: 20,
-                  flexDirection: 'row',
-                  alignSelf: 'center',
-                  gap: 10,
-                  alignItems: 'center',
-                }}>
-                <ActivityIndicator
-                  size={40}
-                  color={theme.colors.onBackground}
-                />
-                <TouchableOpacity onPress={handleCancel}>
-                  <SemiBoldText>Cancel</SemiBoldText>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <>
-                {/* Show the submit Btn if image is there */}
-                <Button
-                  mode="elevated"
-                  disabled={spinner ? true : false}
-                  style={{
-                    width: Dimensions.get('window').width / 2,
-                    alignSelf: 'center',
-                  }}
-                  onPress={spinner ? () => {} : handleSubmit}>
-                  <SemiBoldText>Submit</SemiBoldText>
-                </Button>
-              </>
-            )}
-
-            {prediction && (
-              <View style={{alignItems: 'center', marginTop: 10}}>
-                <SemiBoldText style={styles.responsehead}>
-                  Prediction:
-                </SemiBoldText>
-                <SemiBoldText style={styles.responseText}>
-                  {prediction}
-                </SemiBoldText>
-              </View>
-            )}
-          </>
-        )}
 
         {!spinner && (
           <>
@@ -294,6 +233,107 @@ export default function Home() {
               </TouchableOpacity>
             </View>
           </>
+        )}
+        <View style={styles.imageprediction}>
+          {/* Display the selected image */}
+          {selectedImage && (
+            <>
+              <View>
+                <View style={styles.imageContainer}>
+                  <Image
+                    source={{uri: selectedImage}}
+                    style={styles.imageStyle}
+                  />
+                </View>
+
+                {/* Show the Spinner */}
+                {spinner ? (
+                  <View
+                    style={{
+                      marginTop: 20,
+                      flexDirection: 'row',
+                      alignSelf: 'center',
+                      gap: 10,
+                      alignItems: 'center',
+                    }}>
+                    <ActivityIndicator
+                      size={40}
+                      color={theme.colors.onBackground}
+                    />
+                    <TouchableOpacity onPress={handleCancel}>
+                      <SemiBoldText>Cancel</SemiBoldText>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <>
+                    {!prediction && (
+                      <>
+                        {/* Show the submit Btn if image is there */}
+                        <Button
+                          disabled={spinner ? true : false}
+                          style={styles.btn}
+                          onPress={spinner ? () => {} : handleSubmit}>
+                          <BoldText style={{color: '#fff', fontSize: 15}}>
+                            Submit
+                          </BoldText>
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </View>
+
+              <View>
+                {prediction && (
+                  <View style={{marginTop: 20}}>
+                    <SemiBoldText style={styles.responsehead}>
+                      Prediction:
+                    </SemiBoldText>
+                    <BoldText
+                      style={[
+                        styles.responseText,
+                        {color: theme.colors.green},
+                      ]}>
+                      {prediction?.class}
+                    </BoldText>
+                    <SemiBoldText style={styles.responsehead}>
+                      Probability:
+                    </SemiBoldText>
+                    <RegularText
+                      style={{fontSize: 13, width: 140}}
+                      numberOfLines={2}>
+                      {prediction?.probability}
+                    </RegularText>
+
+                    <View style={{marginVertical: 10}}>
+                      {prediction.class == 'Recyclable' ? (
+                        <Iconify
+                          icon="fluent:bin-recycle-full-24-regular"
+                          size={80}
+                          color={theme.colors.onBackground}
+                          onPress={handleLogout}
+                        />
+                      ) : (
+                        <Iconify
+                          icon="hugeicons:organic-food"
+                          size={80}
+                          color={theme.colors.onBackground}
+                          onPress={handleLogout}
+                        />
+                      )}
+                    </View>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </View>
+
+        {prediction && (
+          <View style={{margin: 3, marginHorizontal: 10, marginBottom: 100}}>
+            <SemiBoldText style={{fontSize: 19}}>Tips:</SemiBoldText>
+            <RegularText style={{fontSize: 14}}>{prediction?.tips}</RegularText>
+          </View>
         )}
       </ScrollView>
     </View>
@@ -333,7 +373,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
-    marginVertical: 30,
+    marginVertical: 10,
   },
   uploadView: {
     backgroundColor: 'rgba(231, 227, 227, 0.237)',
@@ -342,11 +382,11 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignItems: 'center',
-    paddingVertical: 20,
+    justifyContent: 'center',
   },
   imageStyle: {
-    width: 200,
-    height: 200,
+    width: 220,
+    height: 220,
     resizeMode: 'cover',
     borderRadius: 10,
   },
@@ -355,5 +395,19 @@ const styles = StyleSheet.create({
   },
   responseText: {
     fontSize: 22,
+  },
+  imageprediction: {
+    flexDirection: 'row',
+    padding: 8,
+    margin: 8,
+    gap: 15,
+  },
+  btn: {
+    width: 220,
+    alignSelf: 'center',
+    marginVertical: 10,
+    backgroundColor: 'rgb(147, 179, 234)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
   },
 });
