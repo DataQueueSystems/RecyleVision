@@ -19,7 +19,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
 import {showToast} from '../../../utils/Toast';
-
 export default function Login() {
   let theme = useTheme();
   const {setIsLogin, Checknetinfo, ipAddress} = useAuthContext();
@@ -52,6 +51,7 @@ export default function Login() {
         showToast('Something went wrong');
       }
     } catch (error) {
+      console.log(error,'error');
       if (axios.isAxiosError(error)) {
         // Check if the error has a response (like status 400 errors)
         if (error.response) {

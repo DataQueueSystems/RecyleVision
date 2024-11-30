@@ -27,6 +27,7 @@ import {uploadImageToCloudinary} from '../../utils/cloudinary';
 import {Iconify} from 'react-native-iconify';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgComponent from '../Component/SVGComponent';
+import ImageModal from './Modal/ImageModal';
 
 export default function Home() {
   let theme = useTheme();
@@ -34,7 +35,6 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [spinner, setSpinner] = useState(false);
   const [prediction, setPrediction] = useState(null);
-
   const handleImagePicker = () => {
     const options = {
       mediaType: 'photo',
@@ -178,6 +178,25 @@ export default function Home() {
     );
   };
 
+  let notPredication = {
+    flexDirection: 'column',
+    width: '100%',
+  };
+
+  const [visible, setVisible] = useState(false);
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [previmage, setPrevimage] = useState(null);
+  // Function to handle opening the modal with animation
+  const handlePrevImage = imageUri => {
+    setVisible(true);
+    setPrevimage(imageUri);
+    Animated.timing(opacityAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
     <View
       style={[
@@ -234,17 +253,21 @@ export default function Home() {
             </View>
           </>
         )}
+
         <View style={styles.imageprediction}>
           {/* Display the selected image */}
           {selectedImage && (
             <>
-              <View>
-                <View style={styles.imageContainer}>
+              <View style={!prediction ? notPredication : {}}>
+                <TouchableOpacity
+                  onPress={() => handlePrevImage(selectedImage)}
+                  activeOpacity={0.5}
+                  style={styles.imageContainer}>
                   <Image
                     source={{uri: selectedImage}}
                     style={styles.imageStyle}
                   />
-                </View>
+                </TouchableOpacity>
 
                 {/* Show the Spinner */}
                 {spinner ? (
@@ -302,7 +325,7 @@ export default function Home() {
                     <RegularText
                       style={{fontSize: 13, width: 140}}
                       numberOfLines={2}>
-                      {prediction?.probability}
+                      {prediction?.probability.toFixed(10)}
                     </RegularText>
 
                     <View style={{marginVertical: 10}}>
@@ -336,6 +359,13 @@ export default function Home() {
           </View>
         )}
       </ScrollView>
+
+      <ImageModal
+        visible={visible}
+        image={previmage}
+        opacityAnim={opacityAnim}
+        setVisible={setVisible}
+      />
     </View>
   );
 }
